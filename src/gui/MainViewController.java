@@ -15,6 +15,7 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.VBox;
+import model.services.DepartmentService;
 
 public class MainViewController implements Initializable {
 
@@ -32,7 +33,7 @@ public class MainViewController implements Initializable {
 
 	@FXML
 	public void onMenuItemDepartmentAction() {
-		loadView("/gui/DepartmentList.fxml");
+		loadView2("/gui/DepartmentList.fxml");
 	}
 
 	@FXML
@@ -67,6 +68,35 @@ public class MainViewController implements Initializable {
 			mainVbox.getChildren().clear();
 			mainVbox.getChildren().add(mainMenu);
 			mainVbox.getChildren().addAll(newVbox.getChildren());
+
+		} catch (IOException e) {
+			Alerts.showAlert("IO Exception", "Error loading View", e.getMessage(), AlertType.ERROR);
+		}
+	}
+	
+	private synchronized void loadView2(String absoluteName) {
+		try {
+			/*
+			 * Vai carregar o fxml 'about.fxml'
+			 * depois de carregar ele, vai colocar na variavel newVbox
+			 * vai pegar a referencia pra cena principal e pega o conteudo do VBox de lá
+			 * guarda o menu principal (do VBox da cena principal) em uma variável separada
+			 * apaga todo o conteudo do VBox principal
+			 * adiciona o menu novamente, e o conteudo do VBox do About.xml - variavel newVBox
+			 */
+			FXMLLoader loader = new FXMLLoader(getClass().getResource(absoluteName));
+			VBox newVbox = loader.load();
+			Scene mainScene = Main.getMainScene();
+			VBox mainVbox = (VBox) ((ScrollPane) mainScene.getRoot()).getContent();
+
+			Node mainMenu = mainVbox.getChildren().get(0);
+			mainVbox.getChildren().clear();
+			mainVbox.getChildren().add(mainMenu);
+			mainVbox.getChildren().addAll(newVbox.getChildren());
+			
+			DepartmentListController controller = loader.getController();
+			controller.setDepartmentService(new DepartmentService());
+			controller.updateTableView();
 
 		} catch (IOException e) {
 			Alerts.showAlert("IO Exception", "Error loading View", e.getMessage(), AlertType.ERROR);
